@@ -1,0 +1,22 @@
+{
+  "name": "akf-code",
+  "version": "0.0.1",
+  "description": "A CLI code editor",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akif9748/akf-code.git"
+  },
+  "author": "Akif9748",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/Akif9748/akf-code/issues"
+  },
+  "bin": {
+    "acode": "./index.js"
+  },
+  "homepage": "https://github.com/Akif9748/akf-code#readme"
+}
