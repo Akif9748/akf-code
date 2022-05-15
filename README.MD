@@ -5,8 +5,8 @@ A editor to write code in your terminal!
 - `npm i . -g`
 - `acode`
 
-# Keys
-- Ctrl+C: To exit
+## Keys
+- `Ctrl+C`: To exit
 
 ## Features
 - Pointer.
@@ -15,3 +15,6 @@ A editor to write code in your terminal!
 ## TO-DOS
 - [ ] Add readFile && writeFile
 - [ ] Better pointer
+
+## IMAGE:
+![Code_ULNyDBn2hQ](https://user-images.githubusercontent.com/70021050/168487836-d170b820-c9ef-4955-b8b8-93d2cc47d0b3.gif)
