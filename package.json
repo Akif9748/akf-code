@@ -1,6 +1,6 @@
 {
   "name": "akf-code",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A CLI code editor",
   "main": "index.js",
   "scripts": {
