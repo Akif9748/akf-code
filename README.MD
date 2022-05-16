@@ -24,4 +24,4 @@ A editor to write code or etc in your terminal!
 - [x] Cursorline
 
 ## GIF:
-![Code_ULNyDBn2hQ](https://user-images.githubusercontent.com/70021050/168487836-d170b820-c9ef-4955-b8b8-93d2cc47d0b3.gif)
+![WindowsTerminal_NcdhYil3Gi](https://user-images.githubusercontent.com/70021050/168694809-8066f14d-5b46-48a1-b971-b0db5e7a7437.gif)
