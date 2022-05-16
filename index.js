@@ -5,15 +5,16 @@ const readline = require("readline");
 
 // const filePoss = path.resolve(process.cwd(), process.argv[2])
 
-
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 
-let file = [""], curline = cur = 0;
+let file = [""], curY = curX = 0;
 
 render();
 
 process.stdin.on('keypress', (ch, key) => {
+    //  console.log(key)
+
     if (key.ctrl) {
         if (key.name === "s") {
             //TODO!
@@ -26,71 +27,68 @@ process.stdin.on('keypress', (ch, key) => {
 
     }
 
-    if (!file[curline + 1]) file[curline + 1] = "";
+    if (!file[curY + 1]) file[curY + 1] = "";
 
-    // if (file[curline]===file[file.length-1]&&!file[curline])
+    // if (file[curY]===file[file.length-1]&&!file[curY])
 
     switch (key?.name) {
-        case "up":
 
-            if (curline) curline--;
-            cur = file[curline].length
-            render();
-            break;
+        // Arrow keys:
+        case "up": if (curY) curY--; curX = file[curY].length; render(); break;
 
-        case "down":
-            curline++;
-            cur = file[curline].length
-            render();
-            break;
+        case "down": curY++; curX = file[curY].length; render(); break;
 
-        case "left":
+        case "left": if (curX) curX--; render(); break;
 
-            if (cur) cur--;
-            render();
+        case "right": curX++; render(); break;
 
-            break;
-        case "right":
-            cur++;
-            render();
-
-            break;
+        // Enter Key:
         case "return":
-            curline++;
-            cur = file[curline].length
+            file.splice(curY + 1, 0, file[curY].slice(curX));
+            file[curY] = file[curY].slice(0, curX);
 
-            render();
+            curX = file[curY+1].length; curY++; render(); break;
 
-            break;
+        // Delete Key:    
+        case "delete":
+            if (file[curY]) file[curY] = file[curY].substring(0, curX) + file[curY].substring(curX + 1);
+            else file.splice(curY,1)
+            render(); break;
 
+        // Backspace Key:    
         case "backspace":
-            if (cur) {
-                file[curline] = file[curline].substring(0, cur - 1) + file[curline].substring(cur);
+            if (curX) {
+                file[curY] = file[curY].substring(0, curX - 1) + file[curY].substring(curX);
 
-                cur--
+                curX--
 
-            } else
+            }
+            else if (curY) {
                 file = file.slice(0, -1)
+                curY--;
 
-            render();
-            break;
+            }
+
+            render(); break;
+
         default:
             if (!ch) break;
-            file[curline] = file[curline].substring(0, cur) + ch + file[curline].substring(cur);
-            cur++
-
-            render();
-            break;
-
+            file[curY] = file[curY].substring(0, curX) + ch + file[curY].substring(curX);
+            
+            curX++; render(); break;
 
     }
 })
 
 function render() {
     console.clear();
-    const write = [...file.slice(0, curline + 1), " ".repeat(cur) + "^", ...file.slice(curline + 1, file.length)]
 
-    console.log("akf-code - not saved\n\n" + write.join("\n") + `\nCurrent pos: ${curline}:${cur}`);
+    const write = [
+        ...file.slice(0, curY + 1),
+        " ".repeat(curX) + "^",
+        ...file.slice(curY + 1)
+    ];
 
+    console.log("akf-code - not saved\n\n" + write.join("\n") + `\nCurrent pos: ${curY}:${curX}`);
 
 }
