@@ -88,5 +88,9 @@ process.stdin.on('keypress', (ch, key) => {
 
 function render() {
     console.clear();
-    console.log("akf-code - not saved\n\n" + file.join("\n") + " ".repeat(cur) + "^" + `\nCurrent pos: ${curline}:${cur}`);
+    const write = [...file.slice(0, curline + 1), " ".repeat(cur) + "^", ...file.slice(curline + 1, file.length)]
+
+    console.log("akf-code - not saved\n\n" + write.join("\n") + `\nCurrent pos: ${curline}:${cur}`);
+
+
 }
