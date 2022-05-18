@@ -26,9 +26,9 @@ process.stdin.on('keypress', (ch, key) => {
         if (key.name === "s")
             return fs.writeFile(dirName, file.join("\n"), () => console.log("\nSaved! Path:", dirName))
 
-        else if (key.name === "r" && lang.run)
+        else if (key.name === "r" && lang?.run)
 
-            return exec(lang.run + " " + fileName, (e, std, err) => {
+            return exec(lang?.run + " " + fileName, (e, std, err) => {
 
                 if (e) console.error("Error!");
 
@@ -89,7 +89,7 @@ process.stdin.on('keypress', (ch, key) => {
             console.log(ch)
             if (!ch) break;
 
-            file[curY] = file[curY].substring(0, curX) + ch + (lang.bracket && brackets[ch] ? brackets[ch] : "") + file[curY].substring(curX);
+            file[curY] = file[curY].substring(0, curX) + ch + (lang?.bracket && brackets[ch] ? brackets[ch] : "") + file[curY].substring(curX);
 
             curX++; render(); break;
 
