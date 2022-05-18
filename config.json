@@ -1,0 +1,17 @@
+{
+    ".js": {
+        "run": "node",
+        "bracket": true,
+        "colorize": false
+    },
+    ".py": {
+        "run": "python",
+        "bracket": true,
+        "colorize": false
+    },
+    ".rb": {
+        "run": "ruby",
+        "bracket": true,
+        "colorize": false
+    }
+}

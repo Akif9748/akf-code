@@ -1,16 +1,18 @@
 #!/usr/bin/env node
+const { resolve, extname } = require("path"),
+    { exec } = require("child_process"),
+    fs = require("fs"),
+    brackets = require("./brackets.json"),
+    langs = require("./config.json"),
+    table = str => `╔${"═".repeat(str.length + 2)}╗\n║ ${str} ║\n╚${"═".repeat(str.length + 2)}╝`
 
-const readline = require("readline");
-const fs = require("fs");
-const path = require("path");
-const table = str => `╔${"═".repeat(str.length + 2)}╗\n║ ${str} ║\n╚${"═".repeat(str.length + 2)}╝`;
-
-const fileName = process.argv[2] || "untitled.txt";
-const dirName = path.resolve(process.cwd(), fileName);
+const fileName = process.argv[2] || "untitled.txt",
+    dirName = resolve(process.cwd(), fileName),
+    lang = langs[extname(fileName)] || null;
 
 let file = fs.existsSync(dirName) ? fs.readFileSync(dirName, "utf8").replace(/\r/i).split(/\n/) : [""];
 
-readline.emitKeypressEvents(process.stdin);
+require("readline").emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 
 let curY = curX = 0;
@@ -23,6 +25,19 @@ process.stdin.on('keypress', (ch, key) => {
     if (key.ctrl)
         if (key.name === "s")
             return fs.writeFile(dirName, file.join("\n"), () => console.log("\nSaved! Path:", dirName))
+
+        else if (key.name === "r" && lang.run)
+
+            return exec(lang.run + " " + fileName, (e, std, err) => {
+
+                if (e) console.error("Error!");
+
+                if (err) console.error("stderr:\n", err);
+
+                if (std) console.log("stdout:\n", std);
+
+            });
+
 
         else if (key.name === "c")
             return process.exit(0);
@@ -71,8 +86,10 @@ process.stdin.on('keypress', (ch, key) => {
             render(); break;
 
         default:
+            console.log(ch)
             if (!ch) break;
-            file[curY] = file[curY].substring(0, curX) + ch + file[curY].substring(curX);
+
+            file[curY] = file[curY].substring(0, curX) + ch + (lang.bracket && brackets[ch] ? brackets[ch] : "") + file[curY].substring(curX);
 
             curX++; render(); break;
 
@@ -82,13 +99,13 @@ process.stdin.on('keypress', (ch, key) => {
 function render() {
     console.clear();
 
-    const lines = file.map((l, i) => i + " │ " + l)
+    const lines = file.map((l, i) => i + " ".repeat(Math.abs(String(i).length - 4)) + "│ " + l)
 
-    console.log(`${table(`akf-code - ${fileName} | ${curY}:${curX}`)}\n${[
-            ...lines.slice(0, curY + 1),
-            "──┤ " + " ".repeat(curX) + "^",
-            ...lines.slice(curY + 1)
-        ].join("\n")}\nExit: CTRL + C | Save: CTRL + S`);
+    console.log(`${table(`akf-code - ${dirName} | ${curY}:${curX}`)}\n${[
+        ...lines.slice(0, curY + 1),
+        "────┤ " + " ".repeat(curX) + "^",
+        ...lines.slice(curY + 1)
+    ].join("\n")}\nExit: CTRL + C | Save: CTRL + S | Run if supported: CTRL + R`);
 
 }
 
