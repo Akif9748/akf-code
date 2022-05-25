@@ -1,6 +1,5 @@
-#!/usr/bin/env node
 const { resolve, extname } = require("path"),
-    { exec } = require("child_process"),
+    { spawn } = require("child_process"),
     fs = require("fs"),
     brackets = require("./brackets.json"),
     langs = require("./config.json"),
@@ -10,89 +9,93 @@ const fileName = process.argv[2] || "untitled.txt",
     dirName = resolve(process.cwd(), fileName),
     lang = langs[extname(fileName)] || null;
 
-let file = fs.existsSync(dirName) ? fs.readFileSync(dirName, "utf8").replace(/\r/i).split(/\n/) : [""];
+let file = fs.existsSync(dirName) ? fs.readFileSync(dirName, "utf8").split(/\r?\n/) : [""];
 
 require("readline").emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 
-let curY = curX = 0;
+let curY = curX = 0, run;
 
 render();
 
 process.stdin.on('keypress', (ch, key) => {
     //  console.log(key)
 
-    if (key.ctrl)
+    if (key.ctrl) {
         if (key.name === "s")
             return fs.writeFile(dirName, file.join("\n"), () => console.log("\nSaved! Path:", dirName))
 
-        else if (key.name === "r" && lang?.run)
+        else if (key.name === "r" && lang?.run && !run) {
+            run = true;
+            const operation = spawn(lang?.run, [fileName])
 
-            return exec(lang?.run + " " + fileName, (e, std, err) => {
+            operation.stdout.on("data", d => console.log("stdout: ", d.toString()))
+            operation.stderr.on("data", d => console.log("stderr: ", d.toString()))
 
-                if (e) console.error("Error!");
-
-                if (err) console.error("stderr:\n", err);
-
-                if (std) console.log("stdout:\n", std);
-
-            });
+            operation.on("close", c => {
+                run = false
+                console.log("Running is finished with code", c)
+            })
 
 
-        else if (key.name === "c")
-            return process.exit(0);
+        } else if (key.name === "c") {
+            if (run)
+                run = false
+            else
+                return process.exit(0);
+        }
+    } else if (!run) {
 
-        else return;
+        if (!file[curY + 1]) file[curY + 1] = "";
 
-    if (!file[curY + 1]) file[curY + 1] = "";
+        switch (key?.name) {
 
-    switch (key?.name) {
+            // Arrow keys:
+            case "up": if (curY) curY--; curX = file[curY].length; render(); break;
 
-        // Arrow keys:
-        case "up": if (curY) curY--; curX = file[curY].length; render(); break;
+            case "down": curY++; curX = file[curY].length; render(); break;
 
-        case "down": curY++; curX = file[curY].length; render(); break;
+            case "left": if (curX) curX--; else if (curY) curY--; render(); break;
 
-        case "left": if (curX) curX--; else if (curY) curY--; render(); break;
+            case "right": if (!file[curY][curX]) file[curY] += " "; curX++; render(); break;
 
-        case "right": if (!file[curY][curX]) file[curY] += " "; curX++; render(); break;
+            // Enter Key:
+            case "return":
+                file.splice(curY + 1, 0, file[curY].slice(curX));
+                file[curY] = file[curY].slice(0, curX);
 
-        // Enter Key:
-        case "return":
-            file.splice(curY + 1, 0, file[curY].slice(curX));
-            file[curY] = file[curY].slice(0, curX);
+                curX = file[curY + 1].length; curY++; render(); break;
 
-            curX = file[curY + 1].length; curY++; render(); break;
+            // Delete Key:    
+            case "delete":
+                if (file[curY]) file[curY] = file[curY].substring(0, curX) + file[curY].substring(curX + 1);
+                else file.splice(curY, 1)
+                render(); break;
 
-        // Delete Key:    
-        case "delete":
-            if (file[curY]) file[curY] = file[curY].substring(0, curX) + file[curY].substring(curX + 1);
-            else file.splice(curY, 1)
-            render(); break;
+            // Backspace Key:    
+            case "backspace":
+                if (curX) {
+                    file[curY] = file[curY].substring(0, curX - 1) + file[curY].substring(curX);
+                    curX--;
 
-        // Backspace Key:    
-        case "backspace":
-            if (curX) {
-                file[curY] = file[curY].substring(0, curX - 1) + file[curY].substring(curX);
-                curX--;
+                }
+                else if (curY) {
+                    file = file.slice(0, -1);
+                    curY--;
 
-            }
-            else if (curY) {
-                file = file.slice(0, -1);
-                curY--;
+                }
 
-            }
+                render(); break;
 
-            render(); break;
+            default:
+                console.log(ch)
+                if (!ch) break;
 
-        default:
-            console.log(ch)
-            if (!ch) break;
+                file[curY] = file[curY].substring(0, curX) + ch + (lang?.bracket && brackets[ch] ? brackets[ch] : "") + file[curY].substring(curX);
 
-            file[curY] = file[curY].substring(0, curX) + ch + (lang?.bracket && brackets[ch] ? brackets[ch] : "") + file[curY].substring(curX);
+                curX++; render(); break;
 
-            curX++; render(); break;
-
+        }
     }
 })
 
